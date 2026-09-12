@@ -1,124 +1,141 @@
 # AI-Assisted Hospital Patient Flow Simulation
-**Agent-Based Modeling of Organizational Efficiency**
 
-## Overview
-This project implements an **agent-based simulation model** to evaluate the **organizational impact of AI-assisted clinical decision support** in a hospital setting.
-
-The model compares two operational scenarios under identical demand and capacity conditions:
-
-- **Baseline scenario**:  
-  4 clinicians, traditional decision-making (no AI)
-- **AI-assisted scenario**:  
-  3 clinicians supported by an AI decision-support tool
-
-The core objective is to assess whether **AI-enabled reductions in decision latency and variability** can compensate for reduced staffing **without degrading organizational performance**.
-
-The project is developed within the context of **Strategic Management, Operations Management, and Systems Thinking**, and is fully documented in the accompanying project report.
+Agent-based simulation of organizational efficiency gains from AI-driven clinical decision support.
 
 ---
 
-## Modeled System
-The hospital is modeled as a **complex adaptive system** consisting of interacting agents:
+## What this project does
 
-### Patient Agents
-- Arrive stochastically
-- Have heterogeneous severity levels
-- Experience **deterioration when waiting**
-- Progress through decision, treatment, and discharge stages
+The model compares two hospital operating regimes under identical demand and capacity conditions:
 
-### Clinician Agents
-- Act as the main decision-making bottleneck
-- Decision time depends on workload and congestion
-- In the AI-assisted scenario, clinicians retain full control, while AI **reduces decision time and variability**
+- **Baseline**: 4 clinicians, traditional decision-making
+- **AI-assisted**: 3 clinicians supported by an AI decision-support tool
 
-### AI Decision Support
-- Does **not** improve diagnostic accuracy
-- Does **not** replace clinicians
-- Reduces:
-  - Mean decision latency
-  - Variability of decision-making
-- Modeled as a proportional efficiency gain (10%–40%)
+The central question is whether AI-driven reductions in decision latency and variability can compensate for one fewer clinician — and under which conditions that trade-off holds. The scope is deliberately organizational: AI in the model does not improve diagnostic accuracy or replace clinical judgment. It only reduces how long decisions take and how variable that time is.
 
 ---
 
-## Research Questions
-- Can AI-assisted decision support compensate for reduced staffing?
-- Under which demand conditions does AI create organizational value?
-- How do AI-driven reductions in decision delay affect:
-  - Length of Stay (LOS)
-  - Throughput
-  - Tail performance (95th percentile LOS)
-  - System stability and variability?
+## Background
+
+Healthcare organizations increasingly face simultaneous pressure from rising demand, staffing constraints, and clinician burnout. The standard response — adding capacity — is expensive and often impractical. This project asks a different question: how much of the efficiency loss from reduced staffing can be recovered through process-level improvements alone?
+
+The simulation models patient arrivals as a Poisson process, clinicians as the primary decision bottleneck with workload-dependent latency, and patients as heterogeneous agents with individual severity, wait tolerance, and deterioration dynamics. AI support reduces both the mean and standard deviation of clinician decision time by a configurable effectiveness percentage (10%–40%).
+
+This is a course project developed for Strategic Management / Operations Management at the University of Genoa, accompanied by a full research report (see `report/`).
 
 ---
 
-## Key Performance Indicators (KPIs)
-The simulation evaluates organizational performance using:
+## Key results
 
-- **Decision Latency**
-- **Mean Length of Stay (LOS)**
-- **LOS at 95th percentile (LOS p95)**
-- **Throughput**
-- **Variability and robustness (Monte Carlo statistics)**
+Under **low demand** (1 patient per 4 minutes), a 3-clinician AI-assisted team matches baseline performance at approximately 21% AI effectiveness (mean LOS) and 23% (LOS p95). At that demand level AI functions as a cost-efficiency tool rather than a throughput driver — revenue stays constant while staffing costs fall.
 
-All results are obtained through **Monte Carlo simulation (1,000 replications)** to ensure statistical robustness.
+Under **high demand** (1 patient per 3.3 minutes), the break-even point shifts to 25–26% effectiveness across LOS and throughput. Below that threshold, reducing staff while AI is underperforming makes congestion significantly worse — mean LOS nearly doubles at 10% effectiveness. Above it, the AI-assisted configuration outperforms the 4-clinician baseline on both mean and tail metrics.
+
+The sensitivity analysis (Section 7.6 of the report, cells [14–15] of the notebook) holds these findings across ±20% variation in inter-arrival time, confirming they are not artifacts of a single demand assumption.
 
 ---
 
-## Experimental Design
-Two demand regimes are analyzed:
+## Project structure
 
-- **Low load**: demand below capacity (no structural congestion)
-- **High load**: demand near the decision-making bottleneck
-
-The **only structural difference** between scenarios is:
-- Number of clinicians
-- Presence or absence of AI support
-
-This allows isolation of **organizational effects of AI** from capacity expansion.
-
----
-
-## Methodology
-- **Agent-Based Modeling (ABM)** using discrete-event simulation
-- Decision delays generate feedback loops affecting congestion and deterioration
-- AI acts as a **process innovation**, reshaping timing and coordination
-- Results interpreted through:
-  - Healthcare operations theory
-  - Systems thinking
-  - Value-based healthcare
-  - Strategic management frameworks
-
----
-
-## 🗂 Project Structure
- project/
-│── README.md
-│── requirements.txt
-│
+```
+.
+├── README.md
+├── requirements.txt
 ├── src/
-│ └── main.ipynb
-│
+│   └── main.ipynb          # Full simulation: model, Monte Carlo sweep, plots
 ├── results/
-│ └── figures/
-│
+│   ├── 3-2/                # Low load, 3.2-min interarrival (4 plots + summary xlsx)
+│   ├── 3-3/                # Low load, 3.3-min interarrival
+│   ├── 3-4/                # Low load, 3.4-min interarrival
+│   ├── 3-9/                # High load, 3.9-min interarrival
+│   ├── 4-0/                # Nominal high-load scenario (decision, LOS, throughput plots)
+│   ├── 4-1/                # High load, 4.1-min interarrival
+│   ├── sensitivity-los.png
+│   └── sensitivity-throughput.png
 └── report/
-└── Quantifying Organizational Efficiency Gains from AI-Driven.pdf
+    ├── Abstract.docx
+    └── Quantifying Organizational Efficiency Gains from AI-Driven.pdf
+```
 
+Folder names in `results/` correspond to interarrival time in minutes (e.g., `3-3` = one patient every 3.3 minutes). Each folder contains four KPI plots (decision latency, mean LOS, LOS p95, throughput) and a summary spreadsheet of Monte Carlo statistics.
 
 ---
-## Contributors
 
-- Ehsan Izadi Zamanabadi
-- Sina Gholami Fashkhami
-- Seyed Mahdi Seyedishandiz 
-- Reza Dehghani Abbasi
----
-## How to Run
+## Running the simulation
 
-### Install dependencies
+**Requirements**: Python 3.10+
+
 ```bash
 pip install -r requirements.txt
-
-
 jupyter notebook src/main.ipynb
+```
+
+The notebook is organized in 14 numbered cells:
+
+| Cells | Content |
+|---|---|
+| 1–3 | Imports, parameters, utility functions |
+| 4–8 | Agent definitions (Patient, Clinician) and process logic |
+| 9 | `run_scenario()` — single simulation run |
+| 10–11 | Monte Carlo sweep across AI effectiveness levels (1,000 reps) |
+| 12–13 | KPI plots vs AI effectiveness |
+| 14–15 | Sensitivity analysis plots (hardcoded pre-computed values) |
+
+A full sweep (1,000 reps × 30 effectiveness levels) takes several minutes on a standard laptop.
+
+---
+
+## Simulation parameters
+
+| Parameter | Baseline value | Notes |
+|---|---|---|
+| Simulation time | 640 min (8 hrs) | |
+| Warm-up period | 120 min | Excluded from KPI collection |
+| Interarrival mean | 4 min (low) / 3.33 min (high) | Exponential distribution |
+| Clinicians | 4 (baseline) / 3 (AI scenario) | |
+| Beds | 15 | Set high to avoid bed bottlenecks |
+| Decision latency mean | 12 min | Normal, workload-dependent |
+| Decision latency SD | 2 min | |
+| Treatment time mean | 30 min | Scaled by patient severity |
+| Wait tolerance mean | 25 min | Below this, no deterioration |
+| Deterioration rate | 0.03 / min | Applied to excess waiting only |
+| AI effectiveness range | 10%–40% | Proportional reduction in mean and SD |
+| Monte Carlo replications | 1,000 | Per configuration |
+
+---
+
+## KPIs evaluated
+
+- Mean decision latency
+- Mean length of stay (LOS)
+- LOS at 95th percentile (LOS p95)
+- Throughput (patients / minute)
+- LOS standard deviation (stability proxy)
+
+Break-even points — where the 3-clinician AI-assisted configuration matches the 4-clinician baseline — are computed for each KPI and annotated in the plots.
+
+---
+
+## Contributors
+
+- Sina Gholami Fashkhami
+- Ehsan Izadi Zamanabadi
+- Seyed Mahdi Seyedishandiz
+- Reza Dehghani Abbasi
+
+---
+
+## Dependencies
+
+```
+numpy>=1.24
+pandas>=2.0
+simpy>=4.0
+matplotlib>=3.7
+```
+
+---
+
+## Limitations
+
+Results are not calibrated against real hospital data — parameter choices are informed by the operations management literature and chosen to generate realistic congestion dynamics, not to reproduce a specific institution. The model isolates organizational effects by holding demand, bed capacity, and clinical accuracy constant; it does not capture institutional culture, long-term cost dynamics, or downstream clinical outcomes. See Section 10 of the report for a full discussion.
