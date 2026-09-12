@@ -110,9 +110,9 @@ This allows isolation of **organizational effects of AI** from capacity expansio
 ## Contributors
 
 - Ehsan Izadi Zamanabadi
-- Sina
+- Sina Gholami Fashkhami
 - Seyed Mahdi Seyedishandiz 
-- Reza
+- Reza Dehghani Abbasi
 ---
 ## How to Run
 
